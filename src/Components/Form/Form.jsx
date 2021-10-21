@@ -1,42 +1,44 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import s from './Form.module.css';
 
 import Button from './Button';
 import InputName from './InputName';
 import InputTel from './InputTel';
 
-export default class Form extends Component {
-  state = {
-    name: '',
-    number: '',
-  };
+export default function Form({ onSubmit }) {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state);
-    this.clearForm();
+    onSubmit({ name: name, number: number });
+    clearForm();
   };
 
-  clearForm = () => {
-    this.setState({
-      name: '',
-      number: '',
-    });
+  const clearForm = () => {
+    setName('');
+    setNumber('');
   };
 
-  handleChange = ({ target }) => {
+  const handleChange = ({ target }) => {
     const { name, value } = target;
-
-    this.setState({ [name]: value });
+    switch (name) {
+      case 'name':
+        setName(value);
+        break;
+      case 'number':
+        setNumber(value);
+        break;
+      default:
+        return;
+    }
   };
 
-  render() {
-    return (
-      <form className={s.form} name="addContact" onSubmit={this.handleSubmit}>
-        <InputName value={this.state.name} onChange={this.handleChange} name="name"></InputName>
-        <InputTel value={this.state.number} onChange={this.handleChange} name="number" />
-        <Button type="submit" text="Add contact"></Button>
-      </form>
-    );
-  }
+  return (
+    <form className={s.form} name="addContact" onSubmit={handleSubmit}>
+      <InputName value={name} onChange={handleChange} name="name"></InputName>
+      <InputTel value={number} onChange={handleChange} name="number" />
+      <Button type="submit" text="Add contact"></Button>
+    </form>
+  );
 }

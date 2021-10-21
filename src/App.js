@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 import Form from './Components/Form';
@@ -15,68 +15,49 @@ const exampleContacts = [
   { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
 ];
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export default function App() {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    this.setState({ contacts: JSON.parse(localStorage.getItem('contacts')) ?? exampleContacts });
-  }
+  // componentDidMount() {
+  //   this.setState({ contacts: JSON.parse(localStorage.getItem('contacts')) ?? exampleContacts });
+  // }
 
-  componentDidUpdate() {
-    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-  }
+  // componentDidUpdate() {
+  //   localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  // }
 
-  addContact = ({ name, number }) => {
+  const addContact = ({ name, number }) => {
     const newContact = { name: name, number: number, id: uuidv4() };
 
-    if (
-      !this.state.contacts.map(contact => contact.name.toLowerCase()).includes(name.toLowerCase())
-    ) {
-      this.setState(prevState => ({
-        contacts: [...prevState.contacts, newContact],
-      }));
+    if (!contacts.map(contact => contact.name.toLowerCase()).includes(name.toLowerCase())) {
+      setContacts(prevState => [...prevState, newContact]);
     } else alert(`${name} is already in contacts.`);
   };
 
-  formSubmitHandler = data => {
-    this.addContact(data);
+  const deleteContact = id => {
+    setContacts(prevState => prevState.filter(contact => contact.id !== id));
   };
 
-  deleteContactHandler = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
+  const filterHundler = ({ target }) => {
+    const { value } = target;
+    setFilter(value);
   };
 
-  filterHundler = ({ target }) => {
-    const { name, value } = target;
-    this.setState({ [name]: value });
-  };
+  const normalizedFilter = filter.toLowerCase();
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(normalizedFilter),
+  );
 
-  render() {
-    const normalizedFilter = this.state.filter.toLowerCase();
-    const filteredContacts = this.state.contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter),
-    );
-
-    return (
-      <>
-        <SectionH1 title="Phonebook">
-          <Form onSubmit={this.formSubmitHandler}></Form>
-        </SectionH1>
-        <SectionH2 title="Contacts">
-          <Filter value={this.state.filter} onChange={this.filterHundler} />
-          <Contacts
-            contactsList={filteredContacts}
-            onDeleteContact={this.deleteContactHandler}
-          ></Contacts>
-        </SectionH2>
-      </>
-    );
-  }
+  return (
+    <>
+      <SectionH1 title="Phonebook">
+        <Form onSubmit={addContact}></Form>
+      </SectionH1>
+      <SectionH2 title="Contacts">
+        <Filter value={filter} onChange={filterHundler} />
+        <Contacts contactsList={filteredContacts} onDeleteContact={deleteContact}></Contacts>
+      </SectionH2>
+    </>
+  );
 }
-
-export default App;
